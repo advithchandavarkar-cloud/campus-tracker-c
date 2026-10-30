@@ -1,23 +1,4 @@
-/*
- * ============================================================
- *  CAMPUS TRACKER - Interactive Student Management System
- * ============================================================
- *  Features:
- *   - Colourful boxed terminal UI with live status messages
- *   - Safe, validated input (re-prompts instead of failing)
- *   - Search by roll number OR partial name (case-insensitive)
- *   - Update with "press Enter to keep current value"
- *   - Delete with confirmation
- *   - Sort by roll / name / marks
- *   - Analytics dashboard: average, pass rate, grade histogram,
- *     and a top-3 leaderboard
- *   - Export a printable report to report.txt
- *   - Auto-save to students.txt
- *
- *  Build:  gcc -Wall -o student_manager student_manager.c
- *  Run:    ./student_manager
- * ============================================================
- */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +15,6 @@
 #define REPORT_NAME  "report.txt"
 #define PASS_MARK    40.0f
 
-/* ---------- ANSI colours ---------- */
 #define RESET   "\033[0m"
 #define BOLD    "\033[1m"
 #define DIM     "\033[2m"
@@ -52,7 +32,7 @@ struct Student {
     float marks;
 };
 
-/* ---------- Prototypes ---------- */
+
 void  enableColors(void);
 void  banner(void);
 void  line(char c, int n);
@@ -86,9 +66,7 @@ void  sortStudents(struct Student s[], int count);
 void  dashboard(const struct Student s[], int count);
 void  exportReport(const struct Student s[], int count);
 
-/* ============================================================
- *  MAIN
- * ============================================================ */
+
 int main(void) {
     struct Student students[MAX_STUDENTS];
     int count = 0;
@@ -135,15 +113,13 @@ int main(void) {
     return 0;
 }
 
-/* ============================================================
- *  UI HELPERS
- * ============================================================ */
+
 void enableColors(void) {
 #ifdef _WIN32
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
     if (GetConsoleMode(h, &mode))
-        SetConsoleMode(h, mode | 0x0004); /* ENABLE_VIRTUAL_TERMINAL_PROCESSING */
+        SetConsoleMode(h, mode | 0x0004);
 #endif
 }
 
@@ -173,9 +149,7 @@ void pause(void) {
     fgets(tmp, sizeof tmp, stdin);
 }
 
-/* ============================================================
- *  INPUT HELPERS (fgets-based, no leftover-buffer bugs)
- * ============================================================ */
+
 void trim(char *s) {
     char *start = s;
     size_t len;
@@ -189,7 +163,7 @@ int readLine(const char *prompt, char *buf, int size) {
     printf("%s: ", prompt);
     fflush(stdout);
     if (fgets(buf, size, stdin) == NULL) return 0;
-    if (strchr(buf, '\n') == NULL) {          /* line was too long: flush rest */
+    if (strchr(buf, '\n') == NULL) {        
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF) { }
     }
@@ -251,9 +225,7 @@ int containsIgnoreCase(const char *text, const char *pattern) {
     return 0;
 }
 
-/* ============================================================
- *  FILE HANDLING
- * ============================================================ */
+
 void loadStudents(struct Student s[], int *count) {
     FILE *f = fopen(FILE_NAME, "r");
     char buf[200];
@@ -278,9 +250,7 @@ void saveStudents(const struct Student s[], int count) {
     fclose(f);
 }
 
-/* ============================================================
- *  CORE LOGIC / DISPLAY
- * ============================================================ */
+
 int findStudent(const struct Student s[], int count, int rollNo) {
     int i;
     for (i = 0; i < count; i++)
@@ -307,7 +277,7 @@ const char *gradeColor(char g) {
 }
 
 void printBar(float marks) {
-    int filled = (int)(marks / 5.0f + 0.5f), i;   /* 20-cell bar */
+    int filled = (int)(marks / 5.0f + 0.5f), i;   
     char g = calculateGrade(marks);
     printf("%s[", gradeColor(g));
     for (i = 0; i < 20; i++) putchar(i < filled ? '#' : '.');
@@ -329,9 +299,7 @@ void printRow(const struct Student *st) {
     printf("\n");
 }
 
-/* ============================================================
- *  FEATURES
- * ============================================================ */
+
 void addStudent(struct Student s[], int *count) {
     struct Student n;
     int roll, i;
@@ -385,7 +353,7 @@ void searchStudent(const struct Student s[], int count) {
     if (!readLine("  Enter roll number OR part of a name", q, sizeof q)) return;
     if (q[0] == '\0') { err("Empty search."); return; }
 
-    {   /* numeric query -> exact roll lookup */
+    {   
         char *end;
         long r = strtol(q, &end, 10);
         if (*end == '\0') {
@@ -500,7 +468,7 @@ void sortStudents(struct Student s[], int count) {
     displayStudents(s, count);
 }
 
-/* ---------- Dashboard ---------- */
+
 void dashboard(const struct Student s[], int count) {
     int i, j, passed = 0, dist[5] = {0}, maxBin = 1;
     float sum = 0, hi, lo;
@@ -538,7 +506,7 @@ void dashboard(const struct Student s[], int count) {
         printf(RESET " %d\n", dist[j]);
     }
 
-    /* top 3 leaderboard */
+  
     for (i = 0; i < count; i++) order[i] = i;
     for (i = 0; i < count - 1; i++)
         for (j = 0; j < count - i - 1; j++)
@@ -553,7 +521,7 @@ void dashboard(const struct Student s[], int count) {
                s[order[i]].name, s[order[i]].marks, s[order[i]].rollNo);
 }
 
-/* ---------- Export ---------- */
+
 void exportReport(const struct Student s[], int count) {
     FILE *f;
     int i;
